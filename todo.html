@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>To-Do List</title>
+  <link rel="stylesheet" href="todo.css">
+</head>
+<body>
+
+  <main class="wrap">
+    <h1>To-Do List <small>— click to mark done</small></h1>
+
+    <form id="addForm" class="add-form">
+      <input id="taskInput" type="text" placeholder="Add a new task" autocomplete="off">
+      <button type="submit">Add</button>
+    </form>
+
+    <ul id="list" class="task-list"></ul>
+
+    <p class="hint">
+      Click a task to mark it as done <em>(plays a ding)</em>. Delete with the trash button <em>(auto-deletes after 1.5 seconds)</em>.
+    </p>
+  </main>
+
+  <script src="todo.js"></script>
+</body>
+</html>
