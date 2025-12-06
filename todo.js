@@ -1,97 +1,60 @@
-const dingSound = new Audio("ding.done.mp3");   
-const deleteSound = new Audio("ding.delete.mp3"); 
-const addSound = new Audio("ding.add.mp3");
+const ding = new Audio("ding.done.mp3");
+const del = new Audio("ding.delete.mp3");
+const add = new Audio("ding.add.mp3");
 
-function play(audio) {
-  audio.currentTime = 0;
-  audio.play().catch(() => {});
-}
-
-const storageKey = "todo.tasks";
-
-function loadTasks() {
-  try {
-    return JSON.parse(localStorage.getItem(storageKey)) || [];
-  } catch {
-    return [];
-  }
-}
-
-function saveTasks(tasks) {
-  localStorage.setItem(storageKey, JSON.stringify(tasks));
-}
-
+let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
 const list = document.getElementById("list");
-const addForm = document.getElementById("addForm");
-const taskInput = document.getElementById("taskInput");
+const input = document.getElementById("taskInput");
+const form = document.getElementById("addForm");
+
+function save() {
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
 
 function render() {
-  const tasks = loadTasks();
   list.innerHTML = "";
-
-  tasks.forEach((t, i) => {
-    const li = document.createElement("li");
-    li.className = "task-item" + (t.done ? " done" : "");
-
-    const left = document.createElement("div");
-    left.className = "task-left";
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.className = "task-checkbox";
-    checkbox.checked = t.done;
-
-    const text = document.createElement("div");
-    text.className = "task-text";
-    text.textContent = t.text;
-
-    const del = document.createElement("button");
-    del.className = "btn-delete";
-    del.textContent = "✕";
-
-    checkbox.addEventListener("change", () => {
-      if (checkbox.checked) {
-        dingSound.currentTime = 0;
-        dingSound.play().catch(() => {});
-        dingSound.onended = () => {
-          const arr = loadTasks();
-          arr.splice(i, 1);
-          saveTasks(arr);
-          render();
-        };
-      } else {
-        const arr = loadTasks();
-        arr[i].done = false;
-        saveTasks(arr);
-        render();
-      }
-    });
-
-    del.addEventListener("click", () => {
-      play(deleteSound);
-      const arr = loadTasks();
-      arr.splice(i, 1);
-      saveTasks(arr);
-      render();
-    });
-
-    left.appendChild(checkbox);
-    left.appendChild(text);
-    li.appendChild(left);
-    li.appendChild(del);
-    list.appendChild(li);
+  tasks.forEach(function(t, i) {
+    list.innerHTML +=
+      '<li class="' + (t.done ? 'done' : '') + '">' +
+        '<label>' +
+          '<input type="checkbox" ' + (t.done ? "checked" : "") + ' data-i="' + i + '">' +
+          t.text +
+        '</label>' +
+        '<button data-del="' + i + '">✕</button>' +
+      '</li>';
   });
 }
 
-addForm.addEventListener("submit", (ev) => {
-  ev.preventDefault();
-  const text = taskInput.value.trim();
-  if (!text) return;
-  const arr = loadTasks();
-  arr.push({ text: text, done: false });
-  saveTasks(arr);
-  play(addSound);
-  taskInput.value = "";
+list.addEventListener("click", function(e) {
+  if (e.target.getAttribute("data-del")) {
+    del.currentTime = 0;
+    del.play();
+    tasks.splice(e.target.getAttribute("data-del"), 1);
+  } else if (e.target.getAttribute("data-i")) {
+    var i = e.target.getAttribute("data-i");
+    tasks[i].done = !tasks[i].done;
+    if (tasks[i].done) {
+      ding.currentTime = 0;
+      ding.play();
+      setTimeout(function() {
+        tasks.splice(i, 1);
+        save();
+        render();
+      }, 300);
+    }
+  }
+  save();
+  render();
+});
+
+form.addEventListener("submit", function(e) {
+  e.preventDefault();
+  if (!input.value.trim()) return;
+  tasks.push({ text: input.value, done: false });
+  add.currentTime = 0;
+  add.play();
+  input.value = "";
+  save();
   render();
 });
 
